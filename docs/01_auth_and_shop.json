@@ -1,0 +1,69 @@
+{
+  "category": "认证与店铺信息",
+  "description": "登录态验证、用户信息、店铺信息、客服在线状态",
+  "login_note": "登录通过 Playwright 浏览器自动化完成（pdd_login.py），无 HTTP 登录 API。产出 cookies 后供以下接口使用。",
+  "endpoints": [
+    {
+      "name": "获取聊天 Token",
+      "function": "get_token()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/chats/getToken",
+      "source_file": "Channel/pinduoduo/utils/API/get_token.py",
+      "source_line": 15,
+      "request_body": {},
+      "response": {
+        "token": "string - WebSocket 连接 token"
+      },
+      "purpose": "获取聊天 WebSocket 连接所需的 token",
+      "required": true
+    },
+    {
+      "name": "获取用户信息",
+      "function": "get_user_info()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/janus/api/new/userinfo",
+      "source_file": "Channel/pinduoduo/utils/API/get_user_info.py",
+      "source_line": 11,
+      "request_body": {},
+      "response": {
+        "user_id": "string",
+        "username": "string",
+        "mall_id": "string"
+      },
+      "purpose": "获取当前登录用户的 user_id, username, mall_id",
+      "required": true
+    },
+    {
+      "name": "获取店铺信息",
+      "function": "get_shop_info()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/earth/api/merchant/queryMerchantInfoByMallId",
+      "source_file": "Channel/pinduoduo/utils/API/get_shop_info.py",
+      "source_line": 12,
+      "request_body": {},
+      "response": {
+        "mallId": "string",
+        "mallName": "string",
+        "mallLogo": "string"
+      },
+      "purpose": "获取店铺 ID、名称、Logo",
+      "required": true
+    },
+    {
+      "name": "设置客服在线状态",
+      "function": "set_csstatus()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/plateau/chat/set_csstatus",
+      "source_file": "Channel/pinduoduo/utils/API/Set_up_online.py",
+      "source_line": 11,
+      "request_body": {
+        "status": "int - 在线状态（1=上线, 0=离线）"
+      },
+      "response": {
+        "success": "bool"
+      },
+      "purpose": "设置客服在线/离线状态",
+      "required": false
+    }
+  ]
+}

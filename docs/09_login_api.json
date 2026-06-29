@@ -1,0 +1,428 @@
+{
+  "category": "登录认证",
+  "description": "拼多多商家后台登录全链路 API 端点，包含扫码登录（纯HTTP API）和 Playwright 浏览器自动化两种方式",
+  "data_source": "pdd1/pdd-login-api-flow.json + pdd1/pdd-login-api-flow.md (CDP Network Dump, 2026-06-29)",
+  "login_user_example": {
+    "id": 178496330,
+    "mallId": 256393917,
+    "username": "pdd25639391748",
+    "environment": "Windows 10 | Chrome 137 | 1920x1080 | zh-CN"
+  },
+  "total_flow": {
+    "stages": 5,
+    "duration": "~18s",
+    "total_api_calls": 96
+  },
+
+  "methods": {
+    "scan_login": {
+      "name": "扫码登录（纯 HTTP API）",
+      "code_file": "Channel/pinduoduo/pdd_scan_login.py",
+      "description": "通过 3 个核心 HTTP 端点实现扫码登录，不依赖 Playwright。用户用手机扫描二维码完成登录。",
+      "advantage": "轻量、无浏览器依赖、可服务端部署",
+      "core_endpoints": 3,
+      "total_endpoints": 13
+    },
+    "playwright_login": {
+      "name": "账号密码登录（Playwright 浏览器自动化）",
+      "code_file": "Channel/pinduoduo/pdd_login.py",
+      "description": "通过 Playwright 操控真实 Chromium 浏览器，模拟人工填写账号密码+短信验证码登录。",
+      "advantage": "绕过反爬检测、持久化登录态、处理验证码",
+      "core_endpoints": 0,
+      "page_urls": [
+        "https://mms.pinduoduo.com/login (登录页)",
+        "https://mms.pinduoduo.com/home/ (首页验证登录态)",
+        "https://mobile.yangkeduo.com/login.html (买家端登录页)"
+      ]
+    }
+  },
+
+  "scan_login_flow": {
+    "overview": "打开登录页 → 获取二维码 → 轮询扫码状态(2s间隔) → 扫码成功 → 跳转首页",
+    "stages": [
+      {
+        "stage": 1,
+        "name": "登录页加载",
+        "duration": "~2s",
+        "api_count": 8,
+        "apis": [
+          {
+            "seq": 290,
+            "method": "GET",
+            "endpoint": "https://mms.pinduoduo.com/login/?redirectUrl=https://mms.pinduoduo.com/",
+            "description": "登录页 HTML",
+            "request_body": null
+          },
+          {
+            "seq": "283-285",
+            "method": "POST",
+            "endpoint": "https://xg.pinduoduo.com/xg/pfb/a2",
+            "description": "反爬风控指纹上报（3次）",
+            "request_body": "~10KB base64 编码的浏览器指纹+行为数据",
+            "purpose": "风控系统采集设备指纹，用于后续请求的信任度评估"
+          },
+          {
+            "seq": 296,
+            "method": "GET",
+            "endpoint": "https://api.pinduoduo.com/api/server/_stm",
+            "description": "安全 Token 令牌",
+            "request_body": null
+          },
+          {
+            "seq": 297,
+            "method": "GET",
+            "endpoint": "https://mms.pinduoduo.com/login/c5d9c0e5b9f6f72a9695d9880769273d.js",
+            "description": "登录页专属 JS",
+            "request_body": null
+          },
+          {
+            "seq": 299,
+            "method": "GET",
+            "endpoint": "https://xg.pinduoduo.com/xg/pfb/b",
+            "description": "反爬检测结果",
+            "request_body": null
+          },
+          {
+            "seq": 300,
+            "method": "POST",
+            "endpoint": "https://mms.pinduoduo.com/janus/api/new/userinfo",
+            "description": "匿名用户信息（登录前调用）",
+            "request_body": {}
+          },
+          {
+            "seq": 306,
+            "method": "GET",
+            "endpoint": "https://mms.pinduoduo.com/janus/api/queryPasswordEncrypt",
+            "description": "密码加密配置（账号密码登录用）",
+            "request_body": null
+          }
+        ]
+      },
+      {
+        "stage": 2,
+        "name": "获取登录二维码",
+        "duration": "~0.1s",
+        "api_count": 1,
+        "apis": [
+          {
+            "seq": 307,
+            "method": "POST",
+            "endpoint": "https://mms.pinduoduo.com/janus/api/scan/login/qrcode",
+            "description": "获取登录二维码 URL",
+            "code_function": "PDDScanLogin.get_qrcode()",
+            "request_body": {
+              "fingerprint": {
+                "innerHeight": 752,
+                "innerWidth": 1179,
+                "devicePixelRatio": 1.5,
+                "availHeight": 1040,
+                "availWidth": 1920,
+                "height": 1080,
+                "width": 1920,
+                "colorDepth": 24,
+                "locationHref": "https://mms.pinduoduo.com/login/?redirectUrl=https://mms.pinduoduo.com/",
+                "clientWidth": 1179,
+                "clientHeight": 752,
+                "offsetWidth": 1179,
+                "offsetHeight": 752,
+                "scrollWidth": 1179,
+                "scrollHeight": 752,
+                "navigator": {
+                  "appCodeName": "Mozilla",
+                  "appName": "Netscape",
+                  "hardwareConcurrency": 8,
+                  "language": "zh-CN",
+                  "cookieEnabled": true,
+                  "platform": "Win32",
+                  "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+                }
+              }
+            },
+            "response": {
+              "success": true,
+              "errorCode": 1000000,
+              "errorMsg": null,
+              "result": {
+                "uri": "https://w.url.cn/s/ApLa0mM?type=1&data=newTicket$3d5afb0a7fdc4c209b319e90c434e7b0hEFHF19f112fadbe"
+              }
+            },
+            "response_structure": {
+              "short_url": "https://w.url.cn/s/ApLa0mM (腾讯短链)",
+              "type": "1 (扫码登录类型)",
+              "ticket_format": "newTicket${ticketUUID}${32位hash}",
+              "ticket_uuid_example": "3d5afb0a-7fdc-4c20-9b31-9e90c434e7b0",
+              "ticket_hash_example": "hEFHF19f112fadbe"
+            }
+          }
+        ]
+      },
+      {
+        "stage": 3,
+        "name": "轮询扫码状态",
+        "duration": "~12s (7次轮询, 2s间隔)",
+        "api_count": 7,
+        "endpoint": "https://mms.pinduoduo.com/janus/api/scan/login/query",
+        "code_function": "PDDScanLogin.query_scan_status() / wait_for_scan()",
+        "request_body": {
+          "data": "newTicket$3d5afb0a7fdc4c209b319e90c434e7b0hEFHF19f112fadbe",
+          "fingerprint": "同 stage 2 的 fingerprint 对象"
+        },
+        "status_codes": {
+          "1": "等待扫码",
+          "2": "已扫码，等待用户在手机上确认",
+          "3": "登录成功，返回 userInfoVO"
+        },
+        "polls": [
+          { "seq": 329, "status": 1, "meaning": "等待扫码", "duration_ms": 50 },
+          { "seq": 332, "status": 1, "meaning": "等待扫码", "duration_ms": 50 },
+          { "seq": 334, "status": 1, "meaning": "等待扫码", "duration_ms": 50 },
+          { "seq": 337, "status": 1, "meaning": "等待扫码", "duration_ms": 49 },
+          { "seq": 339, "status": 1, "meaning": "等待扫码", "duration_ms": 47 },
+          { "seq": 341, "status": 2, "meaning": "已扫码，等待确认", "duration_ms": 53 },
+          { "seq": 344, "status": 3, "meaning": "登录成功", "duration_ms": 90 }
+        ],
+        "response_status_1_2": {
+          "success": true,
+          "result": {
+            "status": 1,
+            "token": null,
+            "windowsAppShopToken": null,
+            "userInfoVO": null
+          }
+        },
+        "response_status_3_success": {
+          "success": true,
+          "result": {
+            "status": 3,
+            "token": null,
+            "userInfoVO": {
+              "id": 178496330,
+              "mallId": 256393917,
+              "username": "pdd25639391748"
+            }
+          }
+        }
+      },
+      {
+        "stage": 4,
+        "name": "登录后初始化",
+        "duration": "~1.5s",
+        "api_count": 8,
+        "apis": [
+          {
+            "seq": 345,
+            "method": "GET",
+            "endpoint": "https://mms.pinduoduo.com/earth/api/merchant/importNewStatus",
+            "description": "商家入驻状态",
+            "request_body": null
+          },
+          {
+            "seq": 346,
+            "method": "GET",
+            "endpoint": "https://mms.pinduoduo.com/antis/api/refundAddress/getDefaultRefundAddress",
+            "description": "默认退货地址",
+            "request_body": null
+          },
+          {
+            "seq": 347,
+            "method": "POST",
+            "endpoint": "https://mms.pinduoduo.com/janus/api/new/userinfo",
+            "description": "获取用户信息（已认证）",
+            "request_body": {},
+            "code_function": "GetUserInfo.get_user_info()",
+            "response": { "user_id": "string", "username": "string", "mall_id": "string" }
+          },
+          {
+            "seq": 348,
+            "method": "POST",
+            "endpoint": "https://mms.pinduoduo.com/janus/api/user/server/connect",
+            "description": "用户服务连接",
+            "request_body": {}
+          },
+          {
+            "seq": 349,
+            "method": "POST",
+            "endpoint": "https://mms.pinduoduo.com/janus/api/userinfo",
+            "description": "用户详细信息",
+            "request_body": {}
+          },
+          {
+            "seq": 350,
+            "method": "POST",
+            "endpoint": "https://mms.pinduoduo.com/janus/api/subSystem/getAuthToken",
+            "description": "获取子系统认证 Token",
+            "code_function": "PDDScanLogin.get_auth_token()",
+            "request_body": {},
+            "response": { "result": { "token": "string" } }
+          },
+          {
+            "seq": 351,
+            "method": "GET",
+            "endpoint": "https://mms.pinduoduo.com/earth/api/mallInfo/commonMallInfo",
+            "description": "店铺基本信息",
+            "request_body": null
+          },
+          {
+            "seq": 508,
+            "method": "POST",
+            "endpoint": "https://mms.pinduoduo.com/space/user/login",
+            "description": "用户空间登录确认",
+            "request_body": {}
+          }
+        ]
+      },
+      {
+        "stage": 5,
+        "name": "首页渲染",
+        "duration": "~1.5s",
+        "api_count": 72,
+        "description": "登录成功后访问首页，触发 72+ 个 API 并发请求（侧边栏、菜单、灰度开关、营销工具、通知弹窗等）。这些端点非登录必需，此处仅列出分类摘要。",
+        "groups": {
+          "page_entry": { "count": 1, "example": "GET /home/ (首页HTML)" },
+          "sidebar_navigation": { "count": 4, "example": "POST /janus/api/pageResources/sidebar/navigation/query" },
+          "merchant_info": { "count": 12, "example": "POST /earth/api/mallInfo/queryMallAuditInfo (店铺审核)" },
+          "notification_popup": { "count": 11, "example": "POST /newjersy/api/mms/notification/query (通知查询)" },
+          "home_banner": { "count": 4, "example": "POST /mms-gateway/mms/home/page/getMmsHomePageConfig (首页配置)" },
+          "marketing_tools": { "count": 9, "example": "POST /rivendell/api/marketingTools/cards/list (营销卡片)" },
+          "gray_switches": { "count": 50, "description": "各业务模块灰度/菜单开关检查（品牌、跨境、医药、生鲜、CPS等）" }
+        }
+      }
+    ]
+  },
+
+  "core_endpoints_summary": {
+    "scan_login_core": [
+      {
+        "endpoint": "POST /janus/api/scan/login/qrcode",
+        "role": "获取登录二维码 URL",
+        "required_fields": ["fingerprint"],
+        "code_function": "PDDScanLogin.get_qrcode()"
+      },
+      {
+        "endpoint": "POST /janus/api/scan/login/query",
+        "role": "轮询扫码状态 (status: 1→等待 / 2→已扫 / 3→成功)",
+        "required_fields": ["data (ticket)", "fingerprint"],
+        "code_function": "PDDScanLogin.query_scan_status() / wait_for_scan()"
+      },
+      {
+        "endpoint": "POST /janus/api/subSystem/getAuthToken",
+        "role": "登录成功后获取子系统认证 Token",
+        "required_fields": [],
+        "code_function": "PDDScanLogin.get_auth_token()"
+      }
+    ],
+    "fraud_detection": [
+      {
+        "endpoint": "POST https://xg.pinduoduo.com/xg/pfb/a2",
+        "role": "浏览器指纹+行为数据加密上报",
+        "note": "约 10KB base64 数据，含屏幕分辨率/devicePixelRatio/Canvas/UA 等"
+      },
+      {
+        "endpoint": "GET https://xg.pinduoduo.com/xg/pfb/b",
+        "role": "获取风控检测结果"
+      }
+    ],
+    "post_login_init": [
+      { "endpoint": "POST /janus/api/new/userinfo", "role": "获取用户信息 (user_id, mall_id, username)", "code_function": "GetUserInfo.get_user_info()" },
+      { "endpoint": "GET /earth/api/mallInfo/commonMallInfo", "role": "店铺基本信息" },
+      { "endpoint": "GET /earth/api/merchant/queryMerchantInfoByMallId", "role": "获取店铺信息 (mallId, mallName, mallLogo)", "code_function": "GetShopInfo.get_shop_info()" },
+      { "endpoint": "POST /janus/api/subSystem/getAuthToken", "role": "子系统认证 Token" },
+      { "endpoint": "POST /space/user/login", "role": "用户空间登录确认" },
+      { "endpoint": "GET /earth/api/merchant/importNewStatus", "role": "商家入驻状态" },
+      { "endpoint": "GET /antis/api/refundAddress/getDefaultRefundAddress", "role": "默认退货地址" },
+      { "endpoint": "POST /janus/api/user/server/connect", "role": "用户服务连接" },
+      { "endpoint": "POST /janus/api/userinfo", "role": "用户详细信息" },
+      { "endpoint": "GET /janus/api/queryPasswordEncrypt", "role": "密码加密配置（账号密码登录用）" },
+      { "endpoint": "POST /janus/api/checkLogin", "role": "登录状态校验（活动报名前探针也用此端点）" }
+    ]
+  },
+
+  "auth_flow": {
+    "description": "登录成功后认证 Token 的传递链路",
+    "steps": [
+      "#344 login/query (status=3) → 返回 userInfoVO { id, mallId, username } + Cookie 写入 session",
+      "#350 subSystem/getAuthToken → 获取各业务子系统独立认证 Token",
+      "#508 space/user/login → 用户空间登录确认",
+      "#431 queryUserPermissionByUserId → 加载完整权限列表 (50+ 权限项)"
+    ],
+    "cookie_auth": "后续所有 API 请求携带 Cookie 中的 api_uid + rckk 进行鉴权",
+    "note": "登录成功不返回 token，通过 Cookie 传递 session 标识"
+  },
+
+  "fingerprint_fields": {
+    "description": "fingerprint 对象用于反爬验证，可构造固定值，不需要真实浏览器",
+    "fields": {
+      "innerHeight": "int - 视口高度 (752)",
+      "innerWidth": "int - 视口宽度 (1179)",
+      "devicePixelRatio": "float - 设备像素比 (1.5)",
+      "availHeight": "int - 屏幕可用高度 (1040)",
+      "availWidth": "int - 屏幕可用宽度 (1920)",
+      "height": "int - 屏幕高度 (1080)",
+      "width": "int - 屏幕宽度 (1920)",
+      "colorDepth": "int - 颜色深度 (24)",
+      "locationHref": "string - 当前页面 URL",
+      "clientWidth": "int - 客户区宽度 (1179)",
+      "clientHeight": "int - 客户区高度 (752)",
+      "navigator.hardwareConcurrency": "int - CPU 核心数 (8)",
+      "navigator.language": "string - 语言 (zh-CN)",
+      "navigator.platform": "string - 平台 (Win32)",
+      "navigator.cookieEnabled": "bool - Cookie 是否启用 (true)",
+      "navigator.ua": "string - User-Agent"
+    },
+    "code_location": "Channel/pinduoduo/pdd_scan_login.py: PDDScanLogin._build_fingerprint()"
+  },
+
+  "qr_code_structure": {
+    "raw_url": "https://w.url.cn/s/ApLa0mM?type=1&data=newTicket$3d5afb0a7fdc4c209b319e90c434e7b0hEFHF19f112fadbe",
+    "components": {
+      "protocol": "https",
+      "short_domain": "w.url.cn (腾讯短链)",
+      "slug": "ApLa0mM",
+      "type": "1 (扫码登录类型)",
+      "data_format": "newTicket${ticketUUID}${32位hash}",
+      "ticket_uuid": "3d5afb0a-7fdc-4c20-9b31-9e90c434e7b0 (36位 UUID)",
+      "ticket_hash": "hEFHF19f112fadbe (16位 hash)"
+    },
+    "note": "同一个 ticket 在轮询过程中保持不变，服务端通过此 ticket 关联扫码状态"
+  },
+
+  "security_notes": {
+    "browser_fingerprint": "采集屏幕分辨率、devicePixelRatio、硬件并发数、Canvas、语言、UA",
+    "fraud_data_size": "xg/pfb/a2 包含约 10KB base64 编码的行为数据",
+    "qr_expiry": "本会话中 ticket 从生成到登录成功约 14 秒",
+    "poll_anti_replay": "请求体含 fingerprint 对象防重放",
+    "login_response_safety": "登录成功仅返回 userId、mallId、username，不返回手机号/密码"
+  },
+
+  "code_files": {
+    "scan_login": {
+      "file": "Channel/pinduoduo/pdd_scan_login.py",
+      "class": "PDDScanLogin",
+      "methods": [
+        "get_qrcode() → 获取二维码 URL",
+        "query_scan_status() → 查询扫码状态（单次）",
+        "wait_for_scan(timeout, on_status) → 阻塞等待扫码完成",
+        "get_auth_token() → 获取子系统认证 Token",
+        "login(timeout, on_status) → 一键扫码登录",
+        "get_cookies_json() → 序列化 cookies 为 JSON"
+      ],
+      "compat_function": "login_pdd_scan(timeout, on_status) → 与 login_pdd() 返回格式一致"
+    },
+    "playwright_login": {
+      "file": "Channel/pinduoduo/pdd_login.py",
+      "class": "PDDLogin",
+      "methods": [
+        "login() → 账号密码登录（Playwright）",
+        "send_sms_code() → 发送短信验证码",
+        "login_with_sms() → 短信验证码登录",
+        "refresh_cookies() → 刷新 cookies（无头模式）"
+      ],
+      "compat_function": "login_pdd(name, password) → 账号密码登录入口"
+    },
+    "shared_apis": {
+      "get_user_info": "Channel/pinduoduo/utils/API/get_user_info.py → POST /janus/api/new/userinfo",
+      "get_shop_info": "Channel/pinduoduo/utils/API/get_shop_info.py → POST /earth/api/merchant/queryMerchantInfoByMallId",
+      "anti_content": "Channel/pinduoduo/utils/API/anti_content.py → generate_anti_content() 生成 anti-content 头"
+    }
+  }
+}

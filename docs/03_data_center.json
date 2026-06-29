@@ -1,0 +1,95 @@
+{
+  "category": "数据中心",
+  "description": "店铺经营数据、评分、交易趋势、售后品质等数据查询接口（httpx 异步）",
+  "async": true,
+  "http_client": "httpx.AsyncClient",
+  "base_url": "https://mms.pinduoduo.com",
+  "source_file": "Channel/pinduoduo/utils/API/data_center.py",
+  "endpoints": [
+    {
+      "name": "交易趋势列表",
+      "function": "query_trade_list()",
+      "method": "POST",
+      "url": "/sydney/api/mallTrade/queryMallTradeList",
+      "source_line": 159,
+      "request_body": {
+        "date_range": "int - 日期范围类型",
+        "mall_id": "string - 店铺 ID"
+      },
+      "response": {
+        "trade_list": "array - 交易数据列表"
+      },
+      "purpose": "查询店铺交易趋势数据",
+      "required": false
+    },
+    {
+      "name": "店铺评分详情",
+      "function": "query_mall_score()",
+      "method": "POST",
+      "url": "/sydney/api/mallScore/queryMallScoreInfo",
+      "source_line": 182,
+      "request_body": {},
+      "response": {
+        "score": "float - 店铺评分",
+        "description_score": "float - 描述相符评分",
+        "service_score": "float - 服务态度评分",
+        "logistics_score": "float - 物流服务评分"
+      },
+      "purpose": "查询店铺 DSR 评分详情",
+      "required": false
+    },
+    {
+      "name": "售后品质详情",
+      "function": "query_sale_quality()",
+      "method": "POST",
+      "url": "/sydney/api/saleQuality/querySaleQualityDetailInfo",
+      "source_line": 198,
+      "request_body": {},
+      "response": {
+        "sale_quality": "dict - 售后品质数据"
+      },
+      "purpose": "查询售后品质指标详情",
+      "required": false
+    },
+    {
+      "name": "未付订单汇总",
+      "function": "query_not_pay_order()",
+      "method": "POST",
+      "url": "/sydney/api/mallTrade/getMallNotPayOrderInfoV2",
+      "source_line": 220,
+      "request_body": {},
+      "response": {
+        "not_pay_count": "int - 未付订单数",
+        "not_pay_amount": "int - 未付金额（分）"
+      },
+      "purpose": "查询未付款订单汇总",
+      "required": false
+    },
+    {
+      "name": "首页经营概览",
+      "function": "query_home_overview()",
+      "method": "POST",
+      "url": "/sydney/api/mallCoreData/homePageOverView",
+      "source_line": 243,
+      "request_body": {},
+      "response": {
+        "overview": "dict - 经营概览数据"
+      },
+      "purpose": "查询首页经营核心数据概览",
+      "required": false
+    },
+    {
+      "name": "首页推广概览",
+      "function": "query_home_promotion_overview()",
+      "method": "POST",
+      "url": "/sydney/api/mallCoreData/homePagePromotionOverView",
+      "source_line": 262,
+      "request_body": {},
+      "response": {
+        "promotion_overview": "dict - 推广概览数据"
+      },
+      "purpose": "查询首页推广数据概览",
+      "required": false
+    }
+  ]
+}

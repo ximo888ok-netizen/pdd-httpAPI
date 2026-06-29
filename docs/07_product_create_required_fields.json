@@ -1,0 +1,181 @@
+{
+  "title": "商品创建（save_draft）完整必填字段",
+  "endpoint": "POST https://mms.pinduoduo.com/glide/mms/goodsCommit/action/edit",
+  "referer": "https://mms.pinduoduo.com/goods/goods_add/index?id={goods_commit_id}&goods_id={goods_id}",
+  "source_file": "Channel/pinduoduo/utils/API/product_manage.py:442",
+  "reference_file": "reference_save_draft.json",
+  "description": "保存商品草稿的完整请求体，约 100+ 字段。以下按类别整理所有必填字段。save_draft 会自动追加 crawlerInfo、validate_message、validate_message_v2、goods_commit_id、goods_id、cat_id。",
+  "auto_generated_fields": {
+    "crawlerInfo": "由 generate_anti_content() 动态生成，同时用于请求头 anti-content",
+    "validate_message": "SHA256(goods_commit_id ^ cat_id ^ goods_type)",
+    "validate_message_v2": "SHA256(goods_commit_id ^ cat_id ^ mall_id ^ uid)",
+    "goods_commit_id": "由 create_draft() 返回",
+    "goods_id": "由 create_draft() 返回",
+    "cat_id": "传入的类目 ID"
+  },
+  "required_fields": {
+    "基础信息": {
+      "goods_name": {"type": "string", "description": "商品标题", "example": "蟹黄拌面速食拌面方便面泡面小龙虾拌面川派肉酱凉面夜宵自煮盒装", "required": true},
+      "goods_desc": {"type": "string", "description": "商品描述（默认同 goods_name）", "required": true},
+      "cat_id": {"type": "int", "description": "四级叶子类目 ID", "example": 24027, "required": true},
+      "cat_ids": {"type": "array[int]", "description": "四级类目 ID 数组（一级到四级）", "example": [6630, 6689, 23965, 24027], "required": true},
+      "cats": {"type": "array[string]", "description": "类目名称路径", "example": ["粮油米面/南北干货/调味品", "方便速食", "方便面/面皮", "干拌面/热干面"], "required": true},
+      "goods_type": {"type": "int", "description": "商品类型（1=普通商品）", "default": 1, "required": true}
+    },
+    "图片": {
+      "image_url": {"type": "string", "description": "主图 URL（可空，自动取 gallery 第一张）", "example": "", "required": false},
+      "gallery": {
+        "type": "array[object]",
+        "description": "轮播图列表（最多10张）",
+        "required": true,
+        "item_structure": {
+          "url": "string - 图片 URL（pfs.pinduoduo.com 域名）",
+          "type": "int - 图片类型（1=主图/轮播图, 2=详情图）",
+          "file_id": "string|null - 文件 ID"
+        },
+        "example": [
+          {"url": "https://pfs.pinduoduo.com/L90kFE8E7E4B...jpeg", "type": 1, "file_id": null},
+          {"url": "https://pfs.pinduoduo.com/L90kF7AE8EDF...jpeg", "type": 2, "file_id": null}
+        ]
+      },
+      "decorationDetail": {
+        "type": "array[object]",
+        "description": "详情页装修图片楼层",
+        "required": false,
+        "item_structure": {
+          "floor_id": "int - 楼层 ID",
+          "key": "string - 楼层类型（DecImage=图片）",
+          "type": "string - 类型（image）",
+          "priority": "int - 排序优先级",
+          "content_list": "array - 内容列表，每项含 img_url, height, width"
+        }
+      }
+    },
+    "价格": {
+      "market_price": {"type": "int", "description": "市场价（单位：分，如 10100 = ¥101）", "required": true},
+      "market_price_in_yuan": {"type": "string", "description": "市场价（单位：元，如 '101'）", "required": true},
+      "groups": {
+        "type": "object",
+        "description": "拼团价格设置",
+        "required": true,
+        "fields": {
+          "single_price": "int - 单买价（分）",
+          "group_price": "int - 拼团价（分）",
+          "carnival_price": "int|null - 嘉年华价",
+          "customer_num": "int - 拼团人数（默认2）",
+          "buy_limit": "int - 单次购买上限（默认999999）",
+          "order_limit": "int - 订单购买上限（默认999999）",
+          "regular_limit": "string - 定期限购",
+          "regular_limit_duration": "int|null - 限购周期",
+          "min_num_of_order": "int|null - 最小起购量",
+          "community_group_buying": "int - 社区团购（0=否）"
+        }
+      },
+      "two_pieces_discount": {"type": "int", "description": "两件折扣（如 95=95折）", "required": false}
+    },
+    "SKU规格": {
+      "skus": {
+        "type": "array[object]",
+        "description": "SKU 规格列表（至少1个）",
+        "required": true,
+        "item_structure": {
+          "id": "int - SKU ID（新建时为0）",
+          "limit_quantity": "int - 限购数量（0=不限）",
+          "out_sku_sn": "string - 外部 SKU 编码",
+          "is_onsale": "int - 是否上架（1=上架）",
+          "multi_price_in_yuan": "string - 拼团价（元，如 '88'）",
+          "price_in_yuan": "string - 单买价（元，如 '100'）",
+          "multi_price": "int - 拼团价（分，如 8800）",
+          "price": "int - 单买价（分，如 10000）",
+          "quantity_delta": "int - 库存数量",
+          "thumb_url": "string - SKU 缩略图 URL",
+          "weight": "int - 重量（克）",
+          "spec": "array - 规格值列表，每项含 parent_id(规格类型ID), parent_name(规格类型名), spec_id(规格值ID), spec_name(规格值名), is_custom(0=系统/1=自定义)",
+          "oversea_sku": "object - 海外SKU信息",
+          "sku_srv_templates": "string - SKU 服务模板",
+          "shipment_limit_second_list": "array - 发货时限列表",
+          "sku69_code": "string - 69条码"
+        },
+        "example_item": {
+          "id": 0,
+          "limit_quantity": 0,
+          "out_sku_sn": "",
+          "is_onsale": 1,
+          "multi_price_in_yuan": "88",
+          "price_in_yuan": "100",
+          "multi_price": 8800,
+          "price": 10000,
+          "quantity_delta": 500,
+          "thumb_url": "https://pfs.pinduoduo.com/L90k01C...jpeg",
+          "weight": 0,
+          "spec": [{"parent_id": 1218, "parent_name": "款式", "spec_id": 30200806041, "spec_name": "145g蟹黄拌面+小龙虾拌面（共4盒）", "is_custom": 0}],
+          "oversea_sku": {},
+          "sku_srv_templates": "",
+          "shipment_limit_second_list": [],
+          "sku69_code": ""
+        }
+      }
+    },
+    "商品属性": {
+      "goods_properties": {
+        "type": "array[object]",
+        "description": "商品属性列表（来自发布模板，按类目要求填写）",
+        "required": true,
+        "item_structure": {
+          "template_pid": "int - 模板属性 ID",
+          "template_module_id": "int - 模板模块 ID（59338=基本属性, 59339=食品属性）",
+          "ref_pid": "int - 引用属性 ID",
+          "pid": "int - 属性 ID（如 5=品牌, 93=产地, 147=生产许可证编号）",
+          "vid": "int - 属性值 ID（0=自定义值）",
+          "value": "string - 属性值（自定义时填写）",
+          "value_unit": "string - 值单位（如 'g', '天'）",
+          "content": "string - 属性值文本（选项类属性填写，如 '一浩', '广东省'）"
+        },
+        "example_items": [
+          {"template_pid": 375946, "template_module_id": 59338, "ref_pid": 310, "pid": 5, "vid": 1035707, "value": "", "value_unit": "", "content": "一浩"},
+          {"template_pid": 375947, "template_module_id": 59338, "ref_pid": 482, "pid": 93, "vid": 24044, "value": "", "value_unit": "", "content": "中国大陆"},
+          {"template_pid": 379989, "template_module_id": 59338, "ref_pid": 714, "pid": 88, "vid": 0, "value": "145", "value_unit": "g"},
+          {"template_pid": 375952, "template_module_id": 59339, "ref_pid": 743, "pid": 178, "vid": 0, "value": "SC10344190000803", "value_unit": ""}
+        ]
+      }
+    },
+    "物流": {
+      "cost_template_id": {"type": "int", "description": "运费模板 ID（从店铺运费模板获取）", "example": 544142245494784, "required": true},
+      "shipment_limit_second": {"type": "int", "description": "发货时限（秒，172800=48小时）", "default": 172800, "required": true},
+      "weight": {"type": "string|int", "description": "商品重量", "required": false},
+      "is_all_weight_same": {"type": "bool", "description": "所有 SKU 重量是否一致", "default": true, "required": false}
+    },
+    "售后": {
+      "is_refundable": {"type": "int", "description": "是否支持退货（1=支持）", "default": 1, "required": true},
+      "is_pre_sale": {"type": "int", "description": "是否预售（0=否）", "default": 0, "required": true},
+      "is_folt": {"type": "int", "description": "是否 FOLT 模式", "default": 0, "required": true},
+      "second_hand": {"type": "int", "description": "是否二手", "default": 0, "required": true},
+      "invoice_status": {"type": "int", "description": "发票状态", "default": 0, "required": true},
+      "privacy_delivery": {"type": "int", "description": "隐私发货", "default": 0, "required": false}
+    },
+    "其他必填": {
+      "out_goods_sn": {"type": "string", "description": "外部商品编码", "default": "", "required": false},
+      "dead_line_seconds": {"type": "int", "description": "活动截止秒数", "example": 86399, "required": false},
+      "goods_pattern": {"type": "int", "description": "商品模式", "example": 8, "required": false},
+      "check_status": {"type": "int", "description": "审核状态（9=已审核）", "required": false},
+      "is_draft": {"type": "bool", "description": "是否草稿", "required": false}
+    }
+  },
+  "code_simplified_vs_real": {
+    "description": "代码中 ProductCloner._build_product_data() 只构建了约15个核心字段，实际抓包有100+字段",
+    "code_fields": ["goods_name", "image_url", "gallery", "skus", "goods_properties(空)", "cat_ids", "cats", "market_price", "cost_template_id(0)", "goods_type", "shipment_limit_second", "is_refundable", "is_pre_sale", "is_folt", "privacy_delivery", "second_hand", "invoice_status"],
+    "missing_in_code": ["groups(拼团设置)", "decorationDetail(详情页装修)", "goods_properties(完整属性)", "validate_message", "validate_message_v2", "market_price_in_yuan", "two_pieces_discount", "dead_line_seconds", "goods_pattern", "check_status", "is_all_weight_same", "weight"],
+    "note": "save_draft() docstring 明确指出：完整请求体约100+字段，参考 reference_save_draft.json"
+  },
+  "creation_flow": [
+    {"step": 1, "endpoint": "GET /vodka/v2/mms/search/categories/v2?keyword={kw}", "function": "search_categories()", "purpose": "搜索类目"},
+    {"step": 2, "endpoint": "GET /vodka/v2/mms/category/detail?catId={id}", "function": "get_category_detail()", "purpose": "获取类目层级 cat_ids + cats"},
+    {"step": 3, "endpoint": "POST /glide/v2/mms/edit/commit/create_new", "function": "create_draft()", "request_body": {"cat_id": "int"}, "purpose": "创建草稿 → 返回 goods_commit_id + goods_id"},
+    {"step": 4, "endpoint": "POST /galerie/business/get_signature", "function": "_get_upload_signature()", "request_body": {"bucket_tag": "mms-goods-image"}, "purpose": "获取图片上传签名"},
+    {"step": 5, "endpoint": "POST file.pinduoduo.com/api/galerie/get_endpoint", "function": "_get_upload_endpoint()", "request_body": {"bucket_tag": "mms-goods-image"}, "purpose": "获取上传服务器地址"},
+    {"step": 6, "endpoint": "POST https://{endpoint}/v3/store_image", "function": "upload_image()", "purpose": "上传图片 → 返回 pfs.pinduoduo.com URL"},
+    {"step": 7, "endpoint": "POST /draco-ms/mms/template/mall", "function": "get_publish_template()", "request_body": {"cat_id": "int", "goods_commit_id": "string", "goods_id": "int"}, "purpose": "获取发布模板（属性/规格定义）"},
+    {"step": 8, "endpoint": "POST /glide/mms/goodsCommit/action/edit", "function": "save_draft()", "purpose": "保存草稿（提交完整商品数据，字段见上方 required_fields）"},
+    {"step": 9, "endpoint": "POST /glide/mms/goodsCommit/action/edit_spu_key_properties", "function": "save_spu_key_properties()", "purpose": "保存 SPU 关键属性（部分类目需要）"}
+  ]
+}

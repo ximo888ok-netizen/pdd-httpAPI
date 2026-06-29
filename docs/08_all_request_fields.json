@@ -1,0 +1,360 @@
+{
+  "title": "拼多多 HTTP API 全部接口请求体字段汇总",
+  "description": "所有接口的完整请求体字段定义，按业务域分组",
+  "base_url": "https://mms.pinduoduo.com",
+  "auth": "所有请求自动携带 cookies + anti-content 头（由 anti_content.py 动态生成）",
+
+  "01_认证与店铺信息": {
+    "POST /chats/getToken": {
+      "function": "get_token()",
+      "request_body": {},
+      "response": {"token": "string"}
+    },
+    "POST /janus/api/new/userinfo": {
+      "function": "get_user_info()",
+      "request_body": {},
+      "response": {"user_id": "string", "username": "string", "mall_id": "string"}
+    },
+    "POST /earth/api/merchant/queryMerchantInfoByMallId": {
+      "function": "get_shop_info()",
+      "request_body": {},
+      "response": {"mallId": "string", "mallName": "string", "mallLogo": "string"}
+    },
+    "POST /plateau/chat/set_csstatus": {
+      "function": "set_csstatus()",
+      "request_body": {"status": "int - 在线状态（1=上线, 0=离线）"},
+      "response": {"success": "bool"}
+    }
+  },
+
+  "02_客服消息": {
+    "POST /plateau/chat/send_message (文本)": {
+      "function": "send_text()",
+      "request_body": {
+        "data": {
+          "cmd": "send_message",
+          "request_id": "int - 毫秒时间戳",
+          "message": {
+            "to": {"role": "user", "uid": "string - 接收用户 UID"},
+            "from": {"role": "mall_cs"},
+            "content": "string - 文本内容",
+            "msg_id": "null",
+            "type": "int - 消息类型（0=文本）",
+            "is_aut": "int - 是否自动回复（0=手动）",
+            "manual_reply": "int - 手动回复标记（1=手动）"
+          }
+        },
+        "client": "WEB"
+      }
+    },
+    "POST /plateau/chat/send_message (图片)": {
+      "function": "send_image()",
+      "request_body": {
+        "data": {
+          "cmd": "send_message",
+          "request_id": "int - 毫秒时间戳",
+          "message": {
+            "to": {"role": "user", "uid": "string - 接收用户 UID"},
+            "from": {"role": "mall_cs"},
+            "content": "string - 图片 URL",
+            "msg_id": "null",
+            "chat_type": "cs",
+            "type": "int - 消息类型（1=图片）",
+            "is_aut": "int - 是否自动回复",
+            "manual_reply": "int - 手动回复标记"
+          }
+        },
+        "client": "WEB"
+      }
+    },
+    "POST /plateau/message/send/mallGoodsCard": {
+      "function": "send_mallGoodsCard()",
+      "request_body": {
+        "uid": "string - 接收用户 UID",
+        "goods_id": "int - 商品 ID",
+        "biz_type": "int - 业务类型（2=客服推荐商品）"
+      },
+      "special_headers": {
+        "anti-content": "动态生成",
+        "referer": "https://mms.pinduoduo.com/chat-merchant/index.html"
+      }
+    },
+    "POST /latitude/assign/getAssignCsList": {
+      "function": "getAssignCsList()",
+      "request_body": {"wechatCheck": true}
+    },
+    "POST /plateau/chat/move_conversation": {
+      "function": "move_conversation()",
+      "request_body": {
+        "data": {
+          "cmd": "move_conversation",
+          "request_id": "int - 毫秒时间戳",
+          "conversation": {
+            "csid": "string - 目标客服 UID",
+            "uid": "string - 用户 UID",
+            "need_wx": false,
+            "remark": "string - 转接备注（默认'无原因直接转移'）"
+          }
+        },
+        "client": "WEB"
+      }
+    }
+  },
+
+  "03_数据中心": {
+    "POST /sydney/api/mallTrade/queryMallTradeList": {
+      "function": "query_trade_list()",
+      "request_body": {"queryType": "int - 查询类型（6=实时交易趋势）", "queryDate": "string - 查询日期（空=默认）"}
+    },
+    "POST /sydney/api/mallScore/queryMallScoreInfo": {
+      "function": "query_mall_score()",
+      "request_body": {}
+    },
+    "POST /sydney/api/saleQuality/querySaleQualityDetailInfo": {
+      "function": "query_sale_quality()",
+      "request_body": {"queryDate": "string - 查询日期"}
+    },
+    "POST /sydney/api/mallTrade/getMallNotPayOrderInfoV2": {
+      "function": "query_not_pay_order()",
+      "request_body": {}
+    },
+    "POST /sydney/api/mallCoreData/homePageOverView": {
+      "function": "query_home_overview()",
+      "request_body": {},
+      "referer": "https://mms.pinduoduo.com/home"
+    },
+    "POST /sydney/api/mallCoreData/homePagePromotionOverView": {
+      "function": "query_home_promotion_overview()",
+      "request_body": {},
+      "referer": "https://mms.pinduoduo.com/home"
+    }
+  },
+
+  "04_评价管理": {
+    "POST /saturn/reviews/list": {
+      "function": "get_reviews_list()",
+      "request_body": {
+        "startTime": "int|null - 开始时间（秒级时间戳）",
+        "endTime": "int|null - 结束时间（秒级时间戳）",
+        "pageNo": "int - 页码（默认1）",
+        "pageSize": "int - 每页条数（默认10）",
+        "orderSn": "string - 订单号筛选（可空）",
+        "descScore": "array[string]|null - 评分筛选（['1']差评, ['2']中评, ['3']好评）"
+      }
+    },
+    "POST /saturn/reviews/type/agg": {
+      "function": "get_reviews_type_agg()",
+      "request_body": {"rangeType": "int - 时间范围类型（4=近3个月）"}
+    },
+    "POST /saturn/reviews/keywords/agg": {
+      "function": "get_reviews_keywords_agg()",
+      "request_body": {
+        "startTime": "int|null - 开始时间",
+        "endTime": "int|null - 结束时间",
+        "rangeType": "int - 时间范围类型（4=近3个月）"
+      }
+    },
+    "POST /saturn/reviews/detail/info": {
+      "function": "get_review_detail()",
+      "request_body": {"reviewId": "string - 评价 ID", "goodsId": "string - 商品 ID"}
+    },
+    "POST /saturn/reportedReview/edit/createReportedReview": {
+      "function": "create_reported_review()",
+      "request_body": {
+        "reviewId": "string - 评价 ID",
+        "reportType": "string - 举报类型（8=疑似同行恶意竞争）",
+        "pictureUrls": "array[string] - 举报图片 URL 列表",
+        "describes": "string - 举报描述"
+      }
+    },
+    "POST /saturn/reportedReview/query/queryTypesReportedReviewNum": {
+      "function": "query_reported_review_num()",
+      "request_body": {}
+    }
+  },
+
+  "05_活动报名": {
+    "POST /janus/api/checkLogin": {
+      "function": "start() 探针",
+      "request_body": {}
+    },
+    "POST /leekmms/activity/query/detail": {
+      "function": "get_activity_detail()",
+      "request_body": {"activity_id": "int - 活动 ID", "query_source": "int - 查询来源（1）"}
+    },
+    "POST /leekmms/activity/query/eligible/goods/listV2": {
+      "function": "get_eligible_goods()",
+      "request_body": {
+        "activity_id": "int - 活动 ID",
+        "goods_id": "int - 商品 ID",
+        "goods_name": "string - 商品名称筛选（可空）",
+        "page_number": "int - 页码（1）",
+        "eligible": "int - 是否可报名（1）",
+        "page_size": "int - 每页条数（10）"
+      }
+    },
+    "POST /leekmms/activity/query/enroll/rule_v3": {
+      "function": "get_price_rules()",
+      "request_body": {"activity_id": "int - 活动 ID", "goods_id_list": "array[int] - 商品 ID 列表"}
+    },
+    "POST /leekmms/activity/query/enroll/rule_suggest_price": {
+      "function": "get_suggest_prices()",
+      "request_body": {
+        "activity_id": "int - 活动 ID",
+        "goods_id_list": "array[int] - 商品 ID 列表",
+        "source_type": "string - 来源类型（'PROMO-HomeModule'）"
+      }
+    },
+    "POST /lakemms/enrollV2": {
+      "function": "_do_enroll_impl()",
+      "request_body": {
+        "activity_id": "int - 活动 ID",
+        "goods_volist": "array - 报名商品列表，每项含 goods_id, enroll_rule_param, sku_price_list 等"
+      },
+      "retry_strategies": {
+        "30001_建议价更新": "更新建议价后重新构建 body 重试（599行）",
+        "30001_per_goods": "逐个商品单独报名重试（634行）",
+        "2002690_库存超限": "去掉库存参数重试（665行）"
+      }
+    }
+  },
+
+  "06_商品管理_查询类": {
+    "GET /vodka/v2/mms/search/categories/v2": {
+      "function": "search_categories()",
+      "query_params": {"keyword": "string - 搜索关键词"}
+    },
+    "GET /vodka/v2/mms/category/detail": {
+      "function": "get_category_detail()",
+      "query_params": {"catId": "int - 类目 ID"}
+    },
+    "GET /vodka/v2/mms/categories": {
+      "function": "get_category_children()",
+      "query_params": {"parentId": "int - 父类目 ID"}
+    },
+    "GET /vodka/v2/mms/cat1List": {
+      "function": "get_level1_categories()",
+      "query_params": {}
+    },
+    "POST /draco-ms/mms/template/mall": {
+      "function": "get_publish_template()",
+      "request_body": {"cat_id": "int - 类目 ID", "goods_commit_id": "string|null - 草稿 ID", "goods_id": "int|null - 商品 ID"}
+    },
+    "POST /glide/v2/mms/query/rules/limit/new": {
+      "function": "get_publish_rules()",
+      "request_body": {"cat_id": "int - 类目 ID"}
+    },
+    "POST /draco-ms/mms/brand/audit/record": {
+      "function": "get_brand_list()",
+      "request_body": {"cat_id": "int - 类目 ID", "keyword": "string - 品牌关键词"}
+    },
+    "POST /glide/v2/mms/query/spec/name/list": {
+      "function": "query_spec_names()",
+      "request_body": {"cat_id": "int - 类目 ID"}
+    },
+    "POST /glide/v2/mms/query/spec/by/name": {
+      "function": "create_spec_value()",
+      "request_body": {"parent_id": "int - 规格类型 ID", "name": "string - 规格值名称", "cat_id": "int - 类目 ID"}
+    },
+    "POST /glide/v2/mms/query/commit/detail": {
+      "function": "get_draft_detail()",
+      "request_body": {"goods_commit_id": "string - 草稿 ID"}
+    },
+    "POST /latitude/goods/recommendGoods": {
+      "function": "get_product_list()",
+      "request_body": {"page": "int - 页码", "page_size": "int - 每页条数"}
+    },
+    "POST /glide/v2/mms/query/commit/on_shop/detail": {
+      "function": "get_product_detail()",
+      "request_body": {"goods_id": "int - 商品 ID"}
+    }
+  },
+
+  "07_商品管理_图片类": {
+    "POST /galerie/business/get_signature": {
+      "function": "_get_upload_signature()",
+      "request_body": {"bucket_tag": "string - bucket 标签（默认 'mms-goods-image'）"}
+    },
+    "POST file.pinduoduo.com/api/galerie/get_endpoint": {
+      "function": "_get_upload_endpoint()",
+      "request_body": {"bucket_tag": "string - bucket 标签"}
+    },
+    "POST https://{endpoint}/v3/store_image": {
+      "function": "upload_image()",
+      "request_body": "multipart/form-data - 图片文件二进制数据",
+      "response": {"url": "string - pfs.pinduoduo.com 图片 URL"}
+    },
+    "POST /glide/v2/mms/image/thumbnail": {
+      "function": "make_image_thumbnail()",
+      "request_body": {"url": "string - 原图 URL", "width": "int - 目标宽度", "height": "int - 目标高度"}
+    },
+    "POST /garner/mms/dir/dirListV2": {
+      "function": "list_image_dirs()",
+      "request_body": {"parent_dir_id": "int - 父目录 ID（0=根目录）"}
+    },
+    "POST /garner/mms/file/list": {
+      "function": "list_image_files()",
+      "request_body": {"dir_id": "int - 目录 ID", "page": "int - 页码", "page_size": "int - 每页条数"}
+    }
+  },
+
+  "08_商品管理_AI类": {
+    "POST /witcher/api/properties-recommender-by-img": {
+      "function": "ai_recommend_properties()",
+      "request_body": {"image_url": "string - 主图 URL", "cat_id": "int - 类目 ID"}
+    },
+    "POST /witcher/api/rec-goods-title": {
+      "function": "ai_recommend_title()",
+      "request_body": {"image_url": "string - 主图 URL", "cat_name": "string - 类目名称"}
+    }
+  },
+
+  "09_商品管理_创建与编辑": {
+    "POST /glide/v2/mms/edit/commit/create_new": {
+      "function": "create_draft()",
+      "request_body": {"cat_id": "int - 四级叶子类目 ID"},
+      "response": {"goods_commit_id": "string - 草稿 ID", "goods_id": "int - 商品 ID"},
+      "referer": "https://mms.pinduoduo.com/goods/category"
+    },
+    "POST /glide/mms/goodsCommit/action/edit": {
+      "function": "save_draft()",
+      "request_body": "完整商品数据（约100+字段），详见 07_product_create_required_fields.json",
+      "auto_appended_fields": ["goods_commit_id", "goods_id", "cat_id", "crawlerInfo", "validate_message", "validate_message_v2"],
+      "referer": "https://mms.pinduoduo.com/goods/goods_add/index?id={goods_commit_id}&goods_id={goods_id}"
+    },
+    "POST /glide/mms/goodsCommit/action/edit_spu_key_properties": {
+      "function": "save_spu_key_properties()",
+      "request_body": {"goods_commit_id": "string - 草稿 ID", "spu_properties": "array - SPU 关键属性列表"}
+    },
+    "POST /japi/goods/listing": {
+      "function": "set_listing_status(online=True)",
+      "request_body": {"goods_ids": "array[int] - 商品 ID 列表"},
+      "status": "⚠️ TODO: 需抓包确认"
+    },
+    "POST /japi/goods/offline": {
+      "function": "set_listing_status(online=False)",
+      "request_body": {"goods_ids": "array[int] - 商品 ID 列表"},
+      "status": "⚠️ TODO: 需抓包确认"
+    },
+    "POST /japi/goods/delete": {
+      "function": "delete_products()",
+      "request_body": {"goods_ids": "array[int] - 商品 ID 列表"},
+      "status": "⚠️ TODO: 需抓包确认"
+    }
+  },
+
+  "10_通用请求头": {
+    "description": "所有请求通过 base_request.py 的 _build_headers() 自动构建",
+    "headers": {
+      "accept": "application/json, text/plain, */*",
+      "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "anti-content": "由 anti_content.py 通过 execjs 调用 res.js 动态生成",
+      "content-type": "application/json;charset=UTF-8",
+      "origin": "https://mms.pinduoduo.com",
+      "referer": "根据接口不同设置对应来源页",
+      "user-agent": "DEFAULT_USER_AGENT 常量"
+    },
+    "cookies": "自动携带登录流程获取的完整 cookies 字典",
+    "retry": "_execute_with_retry() 内置重试机制"
+  }
+}

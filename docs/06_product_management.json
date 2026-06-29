@@ -1,0 +1,388 @@
+{
+  "category": "商品管理",
+  "description": "商品列表、详情查询、商品发布、图片上传、类目查询、规格管理、AI推荐、上架/下架/删除",
+  "source_files": [
+    "Channel/pinduoduo/utils/API/product_manage.py",
+    "Channel/pinduoduo/utils/API/product_manager.py"
+  ],
+  "endpoints": [
+    {
+      "group": "商品列表与详情",
+      "items": [
+        {
+          "name": "获取店铺商品列表",
+          "function": "get_product_list()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/latitude/goods/recommendGoods",
+          "source_file": "product_manager.py",
+          "source_line": 54,
+          "request_body": {},
+          "purpose": "获取店铺商品列表"
+        },
+        {
+          "name": "获取商品详情",
+          "function": "get_product_detail()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/v2/mms/query/commit/on_shop/detail",
+          "source_file": "product_manager.py",
+          "source_line": 136,
+          "request_body": {
+            "goods_id": "int - 商品 ID"
+          },
+          "purpose": "获取已上架商品的完整详情"
+        }
+      ]
+    },
+    {
+      "group": "类目查询（GET）",
+      "items": [
+        {
+          "name": "搜索类目",
+          "function": "search_categories()",
+          "method": "GET",
+          "url": "https://mms.pinduoduo.com/vodka/v2/mms/search/categories/v2?keyword={keyword}",
+          "source_line": 547,
+          "query_params": {
+            "keyword": "string - 搜索关键词，如'面'、'收纳盒'"
+          },
+          "purpose": "按关键词搜索商品类目"
+        },
+        {
+          "name": "获取类目详情",
+          "function": "get_category_detail()",
+          "method": "GET",
+          "url": "https://mms.pinduoduo.com/vodka/v2/mms/category/detail?catId={cat_id}",
+          "source_line": 567,
+          "query_params": {
+            "catId": "int - 类目 ID"
+          },
+          "response": {
+            "cat_ids": "array[int] - 四级类目 ID 数组（如 [6630, 6689, 23965, 24027]）",
+            "cats": "array[string] - 类目名称路径"
+          },
+          "purpose": "获取类目层级路径（cat_ids + cats）"
+        },
+        {
+          "name": "获取子类目列表",
+          "function": "get_category_children()",
+          "method": "GET",
+          "url": "https://mms.pinduoduo.com/vodka/v2/mms/categories?parentId={parent_id}",
+          "source_line": 583,
+          "query_params": {
+            "parentId": "int - 父类目 ID"
+          },
+          "purpose": "获取子类目列表"
+        },
+        {
+          "name": "获取一级类目列表",
+          "function": "get_level1_categories()",
+          "method": "GET",
+          "url": "https://mms.pinduoduo.com/vodka/v2/mms/cat1List",
+          "source_line": 596,
+          "query_params": {},
+          "purpose": "获取所有一级类目"
+        }
+      ]
+    },
+    {
+      "group": "商品创建/编辑（POST）",
+      "items": [
+        {
+          "name": "创建商品草稿",
+          "function": "create_draft()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/v2/mms/edit/commit/create_new",
+          "source_line": 174,
+          "referer": "https://mms.pinduoduo.com/goods/category",
+          "request_body": {
+            "cat_id": "int - 四级叶子类目 ID"
+          },
+          "response": {
+            "goods_commit_id": "string - 提交草稿 ID",
+            "goods_id": "int - 商品 ID"
+          },
+          "purpose": "创建商品草稿，获取后续操作所需的 ID（★ 创建流程入口）"
+        },
+        {
+          "name": "保存商品草稿",
+          "function": "save_draft()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/mms/goodsCommit/action/edit",
+          "source_line": 521,
+          "referer": "https://mms.pinduoduo.com/goods/goods_add/index?id={goods_commit_id}&goods_id={goods_id}",
+          "request_body": "完整商品数据（100+ 字段，详见 07_product_create_required_fields.json）",
+          "purpose": "提交完整商品数据保存草稿（★★ 最核心端点）"
+        },
+        {
+          "name": "保存 SPU 关键属性",
+          "function": "save_spu_key_properties()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/mms/goodsCommit/action/edit_spu_key_properties",
+          "source_line": 332,
+          "referer": "https://mms.pinduoduo.com/goods/goods_add/index?id={goods_commit_id}&goods_id={goods_id}",
+          "request_body": {
+            "goods_commit_id": "int - 提交草稿 ID",
+            "goods_id": "int - 商品 ID",
+            "key_properties": "array[object] - SPU 属性列表，每项含 {key, value, id}"
+          },
+          "purpose": "保存 SPU 关键属性（部分类目要求，如品牌、产地等）"
+        },
+        {
+          "name": "获取草稿详情",
+          "function": "get_draft_detail()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/v2/mms/query/commit/detail",
+          "source_line": 754,
+          "request_body": {
+            "goods_commit_id": "string - 提交草稿 ID"
+          },
+          "purpose": "获取已保存草稿的完整数据"
+        }
+      ]
+    },
+    {
+      "group": "商品模板与规则（POST）",
+      "items": [
+        {
+          "name": "获取发布模板",
+          "function": "get_publish_template()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/draco-ms/mms/template/mall",
+          "source_line": 626,
+          "request_body": {
+            "cat_id": "int",
+            "goods_commit_id": "string (可选)",
+            "goods_id": "int (可选)"
+          },
+          "purpose": "获取商品发布模板（属性、规格定义）"
+        },
+        {
+          "name": "获取发布规则限制",
+          "function": "get_publish_rules()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/v2/mms/query/rules/limit/new",
+          "source_line": 714,
+          "request_body": {
+            "cat_id": "int"
+          },
+          "purpose": "获取发布规则限制（价格范围、发货时间等）"
+        },
+        {
+          "name": "获取已审核品牌列表",
+          "function": "get_brand_list()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/draco-ms/mms/brand/audit/record",
+          "source_line": 732,
+          "request_body": {
+            "cat_id": "int",
+            "keyword": "string (可选)"
+          },
+          "purpose": "获取该类目下已审核的品牌列表"
+        }
+      ]
+    },
+    {
+      "group": "规格管理（POST）",
+      "items": [
+        {
+          "name": "获取规格类型列表",
+          "function": "query_spec_names()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/v2/mms/query/spec/name/list",
+          "source_line": 653,
+          "request_body": {
+            "cat_id": "int"
+          },
+          "response": {
+            "specs": [
+              {
+                "label": "string - 规格名（如'款式'）",
+                "id": "int - 规格类型 ID"
+              }
+            ]
+          },
+          "purpose": "获取类目下可用规格类型（款式/尺寸/颜色）"
+        },
+        {
+          "name": "按名称查询/创建规格值",
+          "function": "create_spec_value()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/v2/mms/query/spec/by/name",
+          "source_line": 692,
+          "request_body": {
+            "parent_id": "int - 规格类型 ID",
+            "name": "string - 规格值名称",
+            "cat_id": "int - 类目 ID"
+          },
+          "response": {
+            "spec_id": "int - 规格值 ID"
+          },
+          "purpose": "按名称查询或创建规格值，返回 spec_id（自定义规格必须先注册）"
+        }
+      ]
+    },
+    {
+      "group": "图片上传（POST，三步流程）",
+      "items": [
+        {
+          "name": "获取上传签名",
+          "function": "_get_upload_signature()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/galerie/business/get_signature",
+          "source_line": 207,
+          "request_body": {
+            "bucket_tag": "string - 默认 'mms-goods-image'"
+          },
+          "response": {
+            "signature": "string"
+          },
+          "purpose": "获取图片上传签名"
+        },
+        {
+          "name": "获取上传服务器地址",
+          "function": "_get_upload_endpoint()",
+          "method": "POST",
+          "url": "https://file.pinduoduo.com/api/galerie/get_endpoint",
+          "source_line": 231,
+          "request_body": {
+            "bucket_tag": "string - 默认 'mms-goods-image'"
+          },
+          "response": {
+            "endpoint": "string - 上传服务器域名"
+          },
+          "purpose": "获取图片上传服务器地址"
+        },
+        {
+          "name": "上传图片文件",
+          "function": "upload_image()",
+          "method": "POST",
+          "url": "https://{endpoint}/v3/store_image",
+          "source_line": 281,
+          "request_body": "multipart/form-data - 图片文件二进制",
+          "response": {
+            "url": "string - 拼多多图床 URL（pfs.pinduoduo.com）"
+          },
+          "purpose": "上传图片到拼多多图床"
+        }
+      ]
+    },
+    {
+      "group": "图片空间管理（POST）",
+      "items": [
+        {
+          "name": "列出图片空间目录",
+          "function": "list_image_dirs()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/garner/mms/dir/dirListV2",
+          "source_line": 360,
+          "request_body": {
+            "parent_dir_id": "int - 父目录 ID（0=根目录）"
+          },
+          "purpose": "列出图片空间目录"
+        },
+        {
+          "name": "列出图片文件",
+          "function": "list_image_files()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/garner/mms/file/list",
+          "source_line": 402,
+          "request_body": {
+            "dir_id": "int - 目录 ID",
+            "page": "int - 页码",
+            "page_size": "int - 每页数量"
+          },
+          "purpose": "列出目录下图片文件"
+        },
+        {
+          "name": "生成图片缩略图/裁剪",
+          "function": "make_image_thumbnail()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/glide/v2/mms/image/thumbnail",
+          "source_line": 431,
+          "request_body": {
+            "url": "string - 原图 URL",
+            "width": "int - 目标宽度（默认0）",
+            "height": "int - 目标高度（默认0）",
+            "if_cut": "bool - 是否裁剪（默认false）",
+            "dx": "int - 裁剪偏移X（默认0）",
+            "dy": "int - 裁剪偏移Y（默认0）"
+          },
+          "response": {
+            "thumb_url": "string - 缩略图 URL"
+          },
+          "purpose": "生成图片缩略图/裁剪（包装标签图需要）"
+        }
+      ]
+    },
+    {
+      "group": "AI 能力（POST）",
+      "items": [
+        {
+          "name": "AI 推荐商品属性",
+          "function": "ai_recommend_properties()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/witcher/api/properties-recommender-by-img",
+          "source_line": 763,
+          "request_body": {
+            "image_url": "string - 主图 URL",
+            "cat_id": "int - 类目 ID"
+          },
+          "purpose": "根据主图 AI 识别并推荐商品属性"
+        },
+        {
+          "name": "AI 推荐商品标题",
+          "function": "ai_recommend_title()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/witcher/api/rec-goods-title",
+          "source_line": 781,
+          "request_body": {
+            "image_url": "string - 主图 URL",
+            "cat_name": "string - 类目名称"
+          },
+          "purpose": "根据主图 AI 推荐商品标题"
+        }
+      ]
+    },
+    {
+      "group": "上架/下架/删除（⚠️ 待抓包确认）",
+      "items": [
+        {
+          "name": "上架商品",
+          "function": "set_listing_status(online=True)",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/japi/goods/listing",
+          "source_line": 814,
+          "request_body": {
+            "goods_ids": "[int] - 商品 ID 列表"
+          },
+          "purpose": "上架商品（草稿→上架）",
+          "todo": "端点基于推测，需抓包确认"
+        },
+        {
+          "name": "下架商品",
+          "function": "set_listing_status(online=False)",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/japi/goods/offline",
+          "source_line": 814,
+          "request_body": {
+            "goods_ids": "[int] - 商品 ID 列表"
+          },
+          "purpose": "下架商品",
+          "todo": "端点基于推测，需抓包确认"
+        },
+        {
+          "name": "删除商品",
+          "function": "delete_products()",
+          "method": "POST",
+          "url": "https://mms.pinduoduo.com/japi/goods/delete",
+          "source_line": 830,
+          "request_body": {
+            "goods_ids": "[int] - 商品 ID 列表"
+          },
+          "purpose": "删除商品",
+          "todo": "端点基于推测，需抓包确认"
+        }
+      ]
+    }
+  ]
+}

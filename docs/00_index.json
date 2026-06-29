@@ -1,0 +1,85 @@
+{
+  "title": "拼多多商家后台 HTTP API 总索引",
+  "base_url": "https://mms.pinduoduo.com",
+  "image_upload_base": "https://file.pinduoduo.com",
+  "image_cdn_base": "https://pfs.pinduoduo.com",
+  "auth_mechanism": {
+    "type": "cookie",
+    "description": "所有接口依赖登录后的 cookies 进行身份认证",
+    "login_method": "两种方式共存：① Playwright 浏览器自动化（pdd_login.py）② 纯 HTTP API 扫码登录（pdd_scan_login.py）",
+    "login_url": "https://mms.pinduoduo.com/login",
+    "login_api_detail": "09_login_api.json",
+    "anti_content": "每个请求头需携带 anti-content 签名，由 anti_content.py 通过 execjs 调用 res.js 生成"
+  },
+  "common_headers": {
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "zh-CN,zh;q=0.9,en;q=0.8",
+    "anti-content": "<动态生成>",
+    "content-type": "application/json;charset=UTF-8",
+    "origin": "https://mms.pinduoduo.com",
+    "referer": "<根据接口变化>",
+    "user-agent": "<DEFAULT_USER_AGENT from anti_content.py>"
+  },
+  "interface_count": {
+    "total": "42+ (业务接口) + 13 (登录链路)",
+    "login": 13,
+    "auth_and_shop": 4,
+    "customer_service": 5,
+    "data_center": 6,
+    "review_management": 6,
+    "activity_enroll": 6,
+    "product_management": 15
+  },
+  "files": [
+    {
+      "file": "01_auth_and_shop.json",
+      "title": "认证与店铺信息",
+      "endpoints": 4
+    },
+    {
+      "file": "02_customer_service.json",
+      "title": "客服消息",
+      "endpoints": 5
+    },
+    {
+      "file": "03_data_center.json",
+      "title": "数据中心",
+      "endpoints": 6
+    },
+    {
+      "file": "04_review_management.json",
+      "title": "评价管理",
+      "endpoints": 6
+    },
+    {
+      "file": "05_activity_enroll.json",
+      "title": "活动报名",
+      "endpoints": 6
+    },
+    {
+      "file": "06_product_management.json",
+      "title": "商品管理（含创建/上架全流程）",
+      "endpoints": 15
+    },
+    {
+      "file": "07_product_create_required_fields.json",
+      "title": "商品创建（save_draft）必填字段详解",
+      "endpoints": 1
+    },
+    {
+      "file": "08_all_request_fields.json",
+      "title": "全部接口请求体字段汇总",
+      "endpoints": 42
+    },
+    {
+      "file": "09_login_api.json",
+      "title": "登录认证全链路（扫码登录 HTTP API + Playwright）",
+      "endpoints": 13
+    }
+  ],
+  "sync_async": {
+    "sync": "base_request.py 使用 requests 库（同步）",
+    "async": "data_center.py / activity_enroll.py 使用 httpx.AsyncClient（异步）"
+  },
+  "code_location": "Channel/pinduoduo/utils/API/"
+}

@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# 运行时生成的 cookies（含登录凭证，勿提交）
+python/cookies.json
+nodejs/cookies.json
+
+# 日志
+*.log
+
+# 编辑器/系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# IDE 内部目录
+.trae/

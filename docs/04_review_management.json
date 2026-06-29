@@ -1,0 +1,99 @@
+{
+  "category": "评价管理",
+  "description": "商品评价列表、聚合统计、评价详情、举报评论",
+  "base_url": "https://mms.pinduoduo.com",
+  "source_file": "Channel/pinduoduo/utils/API/saturn_service.py",
+  "endpoints": [
+    {
+      "name": "评价列表",
+      "function": "get_reviews_list()",
+      "method": "POST",
+      "url": "/saturn/reviews/list",
+      "source_line": 76,
+      "request_body": {
+        "page": "int - 页码",
+        "size": "int - 每页条数",
+        "filter_type": "int - 筛选类型（全部/好评/中评/差评）"
+      },
+      "response": {
+        "reviews": "array - 评价列表",
+        "total": "int - 总数"
+      },
+      "purpose": "获取商品评价列表",
+      "required": false
+    },
+    {
+      "name": "评价类型聚合统计",
+      "function": "get_reviews_type_agg()",
+      "method": "POST",
+      "url": "/saturn/reviews/type/agg",
+      "source_line": 88,
+      "request_body": {},
+      "response": {
+        "good_count": "int - 好评数",
+        "mid_count": "int - 中评数",
+        "bad_count": "int - 差评数"
+      },
+      "purpose": "评价类型聚合统计",
+      "required": false
+    },
+    {
+      "name": "评价关键词聚合",
+      "function": "get_reviews_keywords_agg()",
+      "method": "POST",
+      "url": "/saturn/reviews/keywords/agg",
+      "source_line": 111,
+      "request_body": {},
+      "response": {
+        "keywords": "array - 关键词聚合列表"
+      },
+      "purpose": "评价关键词聚合分析",
+      "required": false
+    },
+    {
+      "name": "评价详情",
+      "function": "get_review_detail()",
+      "method": "POST",
+      "url": "/saturn/reviews/detail/info",
+      "source_line": 124,
+      "request_body": {
+        "review_id": "string - 评价 ID"
+      },
+      "response": {
+        "detail": "dict - 评价详情"
+      },
+      "purpose": "获取单条评价的详细信息",
+      "required": false
+    },
+    {
+      "name": "举报评论",
+      "function": "create_reported_review()",
+      "method": "POST",
+      "url": "/saturn/reportedReview/edit/createReportedReview",
+      "source_line": 150,
+      "request_body": {
+        "review_id": "string - 评价 ID",
+        "reason_type": "int - 举报原因类型",
+        "reason_desc": "string - 举报描述"
+      },
+      "response": {
+        "success": "bool"
+      },
+      "purpose": "举报违规评论",
+      "required": false
+    },
+    {
+      "name": "查询举报数量",
+      "function": "query_reported_review_num()",
+      "method": "POST",
+      "url": "/saturn/reportedReview/query/queryTypesReportedReviewNum",
+      "source_line": 165,
+      "request_body": {},
+      "response": {
+        "reported_num": "int - 举报数量"
+      },
+      "purpose": "查询已举报评论数量",
+      "required": false
+    }
+  ]
+}

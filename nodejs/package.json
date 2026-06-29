@@ -1,0 +1,15 @@
+{
+  "name": "pdd-httpapi-nodejs",
+  "version": "1.0.0",
+  "description": "拼多多商家后台 HTTP API 封装（Node.js 版）- SDK + 原生 http 服务",
+  "main": "client.js",
+  "scripts": {
+    "start": "node server.js",
+    "sdk": "node -e \"const {PDDClient}=require('./client'); console.log(new PDDClient())\"",
+    "sign": "node anti_content.js"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "dependencies": {}
+}

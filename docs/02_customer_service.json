@@ -1,0 +1,86 @@
+{
+  "category": "客服消息",
+  "description": "发送消息、商品卡片、转接会话等客服相关接口",
+  "source_file": "Channel/pinduoduo/utils/API/send_message.py",
+  "endpoints": [
+    {
+      "name": "发送文本消息",
+      "function": "send_text()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/plateau/chat/send_message",
+      "source_line": 22,
+      "request_body": {
+        "content": "string - 文本内容",
+        "to_uid": "string - 接收方用户 ID",
+        "msg_type": "int - 消息类型（文本=1）"
+      },
+      "response": {
+        "success": "bool"
+      },
+      "purpose": "向买家发送文本消息",
+      "required": true
+    },
+    {
+      "name": "发送图片消息",
+      "function": "send_image()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/plateau/chat/send_message",
+      "source_line": 66,
+      "request_body": {
+        "content": "string - 图片 URL",
+        "to_uid": "string - 接收方用户 ID",
+        "msg_type": "int - 消息类型（图片=2）"
+      },
+      "response": {
+        "success": "bool"
+      },
+      "purpose": "向买家发送图片消息",
+      "required": false
+    },
+    {
+      "name": "发送商品卡片",
+      "function": "send_mallGoodsCard()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/plateau/message/send/mallGoodsCard",
+      "source_line": 108,
+      "request_body": {
+        "goods_id": "int - 商品 ID",
+        "to_uid": "string - 接收方用户 ID"
+      },
+      "response": {
+        "success": "bool"
+      },
+      "purpose": "向买家发送商品卡片消息",
+      "required": false
+    },
+    {
+      "name": "获取分配的客服列表",
+      "function": "getAssignCsList()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/latitude/assign/getAssignCsList",
+      "source_line": 155,
+      "request_body": {},
+      "response": {
+        "cs_list": "array - 客服列表"
+      },
+      "purpose": "获取当前可分配的客服列表",
+      "required": false
+    },
+    {
+      "name": "转移会话",
+      "function": "move_conversation()",
+      "method": "POST",
+      "url": "https://mms.pinduoduo.com/plateau/chat/move_conversation",
+      "source_line": 171,
+      "request_body": {
+        "conversation_id": "string - 会话 ID",
+        "target_cs_id": "string - 目标客服 ID"
+      },
+      "response": {
+        "success": "bool"
+      },
+      "purpose": "将会话转接给其他客服或人工客服",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "category": "活动报名",
+  "description": "拼多多营销活动查询与报名接口（httpx 异步）",
+  "async": true,
+  "http_client": "httpx.AsyncClient",
+  "base_url": "https://mms.pinduoduo.com",
+  "source_file": "Channel/pinduoduo/utils/API/activity_enroll.py",
+  "endpoints": [
+    {
+      "name": "登录状态探针",
+      "function": "start() 探针",
+      "method": "POST",
+      "url": "/janus/api/checkLogin",
+      "source_line": 121,
+      "request_body": {},
+      "response": {
+        "logged_in": "bool"
+      },
+      "purpose": "检查登录态是否有效（报名前置检查）",
+      "required": false
+    },
+    {
+      "name": "查询活动详情",
+      "function": "get_activity_detail()",
+      "method": "POST",
+      "url": "/leekmms/activity/query/detail",
+      "source_line": 145,
+      "request_body": {
+        "activity_id": "int - 活动 ID"
+      },
+      "response": {
+        "activity_detail": "dict - 活动详情"
+      },
+      "purpose": "查询营销活动的详细信息",
+      "required": false
+    },
+    {
+      "name": "查询可报名商品",
+      "function": "get_eligible_goods()",
+      "method": "POST",
+      "url": "/leekmms/activity/query/eligible/goods/listV2",
+      "source_line": 155,
+      "request_body": {
+        "activity_id": "int - 活动 ID"
+      },
+      "response": {
+        "goods_list": "array - 可报名商品列表"
+      },
+      "purpose": "查询某个活动下可报名的商品列表",
+      "required": false
+    },
+    {
+      "name": "获取价格规则",
+      "function": "get_price_rules()",
+      "method": "POST",
+      "url": "/leekmms/activity/query/enroll/rule_v3",
+      "source_line": 173,
+      "request_body": {
+        "activity_id": "int - 活动 ID",
+        "goods_id": "int - 商品 ID"
+      },
+      "response": {
+        "price_rules": "dict - 价格规则"
+      },
+      "purpose": "获取活动报名的价格规则限制",
+      "required": false
+    },
+    {
+      "name": "获取建议价",
+      "function": "get_suggest_prices()",
+      "method": "POST",
+      "url": "/leekmms/activity/query/enroll/rule_suggest_price",
+      "source_line": 204,
+      "request_body": {
+        "activity_id": "int - 活动 ID",
+        "goods_id": "int - 商品 ID"
+      },
+      "response": {
+        "suggest_prices": "dict - 建议价格"
+      },
+      "purpose": "获取系统推荐的建议报名价格",
+      "required": false
+    },
+    {
+      "name": "执行活动报名",
+      "function": "_do_enroll_impl()",
+      "method": "POST",
+      "url": "/lakemms/enrollV2",
+      "source_line": "557, 599, 634, 665",
+      "request_body": {
+        "activity_id": "int - 活动 ID",
+        "goods_list": "array - 报名商品列表（含 goods_id, price, quantity 等）"
+      },
+      "response": {
+        "success": "bool",
+        "error_code": "int - 错误码（30001=建议价需更新, 2002690=库存超限）"
+      },
+      "purpose": "执行活动报名提交，支持 3 种重试策略：建议价更新(599行)、per-goods(634行)、去库存(665行)",
+      "required": false,
+      "retry_strategies": [
+        "30001: 建议价过期 → 更新建议价后重试",
+        "30001 per-goods: 逐个商品重试",
+        "2002690: 库存超限 → 去掉库存后重试"
+      ]
+    }
+  ],
+  "note": "get_activity_list() (731行) 当前返回硬编码空结果，提示'请在UI输入活动ID'，未实际调用 HTTP"
+}
