@@ -213,8 +213,9 @@ class BaseRequest:
         if not isinstance(data, dict):
             return data
         result = {}
+        sensitive_lower = {s.lower() for s in self._SENSITIVE_KEYS}
         for k, v in data.items():
-            if k.lower() in self._SENSITIVE_KEYS or any(s in k.lower() for s in self._SENSITIVE_KEYS):
+            if k.lower() in sensitive_lower:
                 result[k] = '***'
             elif isinstance(v, dict):
                 result[k] = self._sanitize(v)

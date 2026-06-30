@@ -16,7 +16,7 @@ class ActivityEnrollAPI(BaseRequest):
     def check_login(self) -> Optional[Dict[str, Any]]:
         """登录状态探针 → POST /janus/api/checkLogin"""
         url = f"{BASE}/janus/api/checkLogin"
-        return self.post(url, data="", referer=ACT_REFERER)
+        return self.post(url, json_data={}, referer=ACT_REFERER)
 
     def get_activity_detail(self, activity_id: int) -> Optional[Dict[str, Any]]:
         """查询活动详情 → POST /leekmms/activity/query/detail
@@ -35,12 +35,13 @@ class ActivityEnrollAPI(BaseRequest):
         url = f"{BASE}/leekmms/activity/query/eligible/goods/listV2"
         data = {
             "activity_id": activity_id,
-            "goods_id": goods_id if goods_id is not None else 0,
             "goods_name": goods_name,
             "page_number": page,
             "eligible": 1,
             "page_size": page_size,
         }
+        if goods_id is not None:
+            data["goods_id"] = goods_id
         return self.post(url, json_data=data, referer=ACT_REFERER)
 
     def get_price_rules(self, activity_id: int,

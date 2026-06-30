@@ -105,8 +105,8 @@ class ProductAPI extends BaseRequest {
         if (!endpoint || !endpoint.success) { console.error('[product] 获取上传地址失败'); return null; }
         const ep = (endpoint.result || {}).endpoint;
         if (!ep) { console.error('[product] endpoint 为空'); return null; }
-        // 上传文件 multipart
-        return this._uploadFile(`https://${ep}/v3/store_image`, filePath);
+        const sigVal = (sig.result || {}).signature;
+        return this._uploadFile(`https://${ep}/v3/store_image?signature=${encodeURIComponent(sigVal || '')}`, filePath);
     }
 
     _uploadFile(uploadUrl, filePath) {

@@ -25,7 +25,7 @@ class DataCenterAPI(BaseRequest):
     def query_mall_score(self) -> Optional[Dict[str, Any]]:
         """店铺 DSR 评分详情 → POST /sydney/api/mallScore/queryMallScoreInfo"""
         url = f"{BASE}/sydney/api/mallScore/queryMallScoreInfo"
-        return self.post(url, data="", referer=HOME_REFERER)
+        return self.post(url, json_data={}, referer=HOME_REFERER)
 
     def query_sale_quality(self, query_date: str = "") -> Optional[Dict[str, Any]]:
         """售后品质指标 → POST /sydney/api/saleQuality/querySaleQualityDetailInfo
@@ -39,12 +39,12 @@ class DataCenterAPI(BaseRequest):
     def query_not_pay_order(self) -> Optional[Dict[str, Any]]:
         """未付订单汇总 → POST /sydney/api/mallTrade/getMallNotPayOrderInfoV2"""
         url = f"{BASE}/sydney/api/mallTrade/getMallNotPayOrderInfoV2"
-        return self.post(url, data="", referer=HOME_REFERER)
+        return self.post(url, json_data={}, referer=HOME_REFERER)
 
     def query_home_overview(self) -> Optional[Dict[str, Any]]:
         """首页经营概览 → POST /sydney/api/mallCoreData/homePageOverView"""
         url = f"{BASE}/sydney/api/mallCoreData/homePageOverView"
-        return self.post(url, data="", referer=HOME_REFERER)
+        return self.post(url, json_data={}, referer=HOME_REFERER)
 
     def query_home_promotion_overview(self) -> Optional[Dict[str, Any]]:
         """首页推广概览 → POST /sydney/api/mallCoreData/homePagePromotionOverView"""

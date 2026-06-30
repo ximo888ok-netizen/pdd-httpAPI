@@ -108,7 +108,7 @@ route('POST', '/login/wait', async (req) => {
     const mallId = String(result.mall_id);
     auth.saveCookies(mallId, result.cookies, result.user_id, result.username);
     _clients[mallId] = new PDDClient({ mallId, autoLogin: true });
-    return ok({ mall_id: mallId, user_id: result.user_id, username: result.username });
+    return ok({ mall_id: mallId, user_id: result.user_id, username: result.username, qrcode_url: uri });
 });
 
 // ══════════════════════════════════════════════════════════════════════

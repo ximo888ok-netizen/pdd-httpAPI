@@ -12,7 +12,7 @@ class ReviewAPI(BaseRequest):
 
     def get_reviews_list(self, page_no: int = 1, page_size: int = 10,
                          start_time: Optional[int] = None, end_time: Optional[int] = None,
-                         order_sn: str = None,
+                         order_sn: Optional[str] = None,
                          desc_score: Optional[List[str]] = None) -> Optional[Dict[str, Any]]:
         """评价列表 → POST /saturn/reviews/list
 
@@ -91,4 +91,4 @@ class ReviewAPI(BaseRequest):
     def query_reported_review_num(self) -> Optional[Dict[str, Any]]:
         """查询已举报评论数量 → POST /saturn/reportedReview/query/queryTypesReportedReviewNum"""
         url = f"{BASE}/saturn/reportedReview/query/queryTypesReportedReviewNum"
-        return self.post(url, data="", referer=REVIEW_REFERER)
+        return self.post(url, json_data={}, referer=REVIEW_REFERER)

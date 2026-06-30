@@ -10,11 +10,15 @@
 
 ```
 pdd-httpAPI/
-├── 00_index.json ~ 09_login_api.json   # 接口文档（原有，未改动）
-├── anti_content.js                      # 签名生成器（原有，未改动）
+├── anti-content/
+│   ├── main.py                          # 签名算法测试脚本
+│   ├── requirements.txt
+│   └── res.js                           # 签名核心算法（580KB）
+├── anti_content.js                      # 签名生成器（Node.js），vm 模块执⾏ res.js
+├── docs/                                # 9 份接口文档 JSON（原有，未改动）
 │
 ├── python/
-│   ├── anti_content.py                  # 签名生成，execjs 调外部 res.js
+│   ├── anti_content.py                  # 签名生成，execjs 调用 anti-content/res.js
 │   ├── base_request.py                  # 请求基类，带重试/节流/签名注入
 │   ├── auth.py                          # 扫码登录 + cookies 读写
 │   ├── client.py                        # PDDClient，聚合下面 6 个模块
@@ -29,7 +33,7 @@ pdd-httpAPI/
 │   └── requirements.txt
 │
 └── nodejs/
-    ├── anti_content.js                  # 复用上层 anti_content.js
+    ├── anti_content.js                  # 复用根目录 anti_content.js
     ├── base_request.js                  # 请求基类，零依赖，用内置 https
     ├── auth.js
     ├── client.js
@@ -38,7 +42,7 @@ pdd-httpAPI/
     └── package.json
 ```
 
-两套代码互相独立，不依赖项目里其他模块。唯一的外部引用是 `Anti-Content-pdd/res.js`（签名算法，只读）。
+两套代码互相独立。签名算法 `res.js` 位于项目内的 `anti-content/` 目录，不依赖外部仓库。
 
 ---
 
@@ -122,12 +126,13 @@ Python 用 8000，Node.js 用 8001，两边路由路径一致。
 Web 服务登录：
 
 ```bash
-# 拿二维码
+# 获取二维码
 curl -X POST http://localhost:8000/login/qrcode
-# 返回 {"qrcode_url": "https://w.url.cn/s/...", "ticket": "..."}
+# 返回 {"success": true, "data": {"qrcode_url": "...", "ticket": "..."}}
 
-# 等扫码完成（阻塞到扫完或超时）
-curl -X POST http://localhost:8000/login/wait -H "Content-Type: application/json" -d '{"timeout":120}'
+# 等待扫码完成（阻塞直到扫码或超时，成功时返回 qrcode_url 供展示）
+curl -X POST http://localhost:8000/login/wait -H "Content-Type: application/json" -d '{"timeout": 120}'
+# 返回 {"success": true, "data": {"mall_id": "...", "user_id": "...", "username": "...", "qrcode_url": "..."}}
 ```
 
 ---
@@ -271,7 +276,7 @@ Web 服务：
 
 ## 实现说明
 
-**签名**：Python 用 `execjs` 编译 `res.js`，Node.js 用内置 `vm` 模块跑。580KB 的 JS 只编译一次，后面复用。不是所有请求都要签名，`requires_anti_content()` 按白名单判断，命中的才塞 `anti-content` 头。
+**签名**：Python 用 `execjs` 编译 `anti-content/res.js`，Node.js 用内置 `vm` 模块跑。580KB 的 JS 只编译一次，后面复用。不是所有请求都要签名，`requires_anti_content()` 按白名单判断，命中的才塞 `anti-content` 头。
 
 **请求基类**做了这几件事：
 - 重试：指数退避 + 随机抖动，默认 3 次
@@ -281,4 +286,4 @@ Web 服务：
 
 **依赖**：Python 那几个包在 `requirements.txt` 里（requests、fastapi、uvicorn、PyExecJS、pydantic）。Node.js 零依赖，只用内置模块。
 
-**没做的**：Playwright 账号密码登录（只有扫码）、WebSocket 收消息（只有 HTTP 发）、数据库（只存文件）。`pdd-httpAPI/` 外面的文件一个没动。
+**没做的**：Playwright 账号密码登录（只有扫码）、WebSocket 收消息（只有 HTTP 发）、数据库（只存文件）。所有依赖文件均在 `pdd-httpAPI/` 目录内，不依赖外部项目。

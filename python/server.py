@@ -118,7 +118,8 @@ def login_wait(body: LoginWaitRequest):
     client = PDDClient(mall_id=mall_id, auto_login=True)
     _clients[mall_id] = client
     return ok({"mall_id": mall_id, "user_id": result.get("user_id"),
-               "username": result.get("username", "")})
+               "username": result.get("username", ""),
+               "qrcode_url": uri})
 
 
 # ══════════════════════════════════════════════════════════════════════

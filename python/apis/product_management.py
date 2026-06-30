@@ -190,7 +190,7 @@ class ProductAPI(BaseRequest):
             logger.error("上传 endpoint 为空")
             return None
         # 步骤3：上传文件（multipart/form-data）
-        upload_url = f"https://{endpoint}/v3/store_image"
+        upload_url = f"https://{endpoint}/v3/store_image?signature={signature}"
         with open(file_path, "rb") as f:
             files = {"file": (os.path.basename(file_path), f)}
             headers = self._build_headers(upload_url, referer=GOODS_ADD_REFERER)

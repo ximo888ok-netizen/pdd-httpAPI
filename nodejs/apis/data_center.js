@@ -10,20 +10,20 @@ class DataCenterAPI extends BaseRequest {
             { json: { queryType, queryDate }, referer: HOME_REFERER });
     }
     async queryMallScore() {
-        return this.post(`${BASE}/sydney/api/mallScore/queryMallScoreInfo`, { data: '', referer: HOME_REFERER });
+        return this.post(`${BASE}/sydney/api/mallScore/queryMallScoreInfo`, { data: '{}', referer: HOME_REFERER });
     }
     async querySaleQuality(queryDate = '') {
         return this.post(`${BASE}/sydney/api/saleQuality/querySaleQualityDetailInfo`,
             { json: { queryDate }, referer: HOME_REFERER });
     }
     async queryNotPayOrder() {
-        return this.post(`${BASE}/sydney/api/mallTrade/getMallNotPayOrderInfoV2`, { data: '', referer: HOME_REFERER });
+        return this.post(`${BASE}/sydney/api/mallTrade/getMallNotPayOrderInfoV2`, { data: '{}', referer: HOME_REFERER });
     }
     async queryHomeOverview() {
-        return this.post(`${BASE}/sydney/api/mallCoreData/homePageOverView`, { data: '', referer: HOME_REFERER });
+        return this.post(`${BASE}/sydney/api/mallCoreData/homePageOverView`, { data: '{}', referer: HOME_REFERER });
     }
     async queryHomePromotionOverview() {
-        return this.post(`${BASE}/sydney/api/mallCoreData/homePagePromotionOverView`, { data: '', referer: HOME_REFERER });
+        return this.post(`${BASE}/sydney/api/mallCoreData/homePagePromotionOverView`, { data: '{}', referer: HOME_REFERER });
     }
 }
 

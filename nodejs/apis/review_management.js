@@ -30,7 +30,7 @@ class ReviewAPI extends BaseRequest {
     }
     async queryReportedReviewNum() {
         return this.post(`${BASE}/saturn/reportedReview/query/queryTypesReportedReviewNum`,
-            { data: '', referer: REVIEW_REFERER });
+            { data: '{}', referer: REVIEW_REFERER });
     }
 }
 

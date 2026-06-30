@@ -6,16 +6,17 @@ const ACT_REFERER = 'https://mms.pinduoduo.com/activity';
 
 class ActivityEnrollAPI extends BaseRequest {
     async checkLogin() {
-        return this.post(`${BASE}/janus/api/checkLogin`, { data: '', referer: ACT_REFERER });
+        return this.post(`${BASE}/janus/api/checkLogin`, { data: '{}', referer: ACT_REFERER });
     }
     async getActivityDetail(activityId) {
         return this.post(`${BASE}/leekmms/activity/query/detail`,
             { json: { activity_id: activityId, query_source: 1 }, referer: ACT_REFERER });
     }
     async getEligibleGoods(activityId, opts = {}) {
-        const { goodsId = 0, goodsName = '', page = 1, pageSize = 10 } = opts;
-        const data = { activity_id: activityId, goods_id: goodsId, goods_name: goodsName,
+        const { goodsId, goodsName = '', page = 1, pageSize = 10 } = opts;
+        const data = { activity_id: activityId, goods_name: goodsName,
                        page_number: page, eligible: 1, page_size: pageSize };
+        if (goodsId != null) data.goods_id = goodsId;
         return this.post(`${BASE}/leekmms/activity/query/eligible/goods/listV2`, { json: data, referer: ACT_REFERER });
     }
     async getPriceRules(activityId, goodsIdList) {

@@ -38,9 +38,9 @@ const vm = require('vm');
 
 /**
  * res.js 核心算法文件路径
- * 相对于本文件位置: ../../Anti-Content-pdd/res.js
+ * 相对于本文件位置: anti-content/res.js
  */
-const RES_JS_PATH = path.resolve(__dirname, '..', 'Anti-Content-pdd', 'res.js');
+const RES_JS_PATH = path.resolve(__dirname, 'anti-content', 'res.js');
 
 /**
  * 统一 User-Agent（与 Python 版 anti_content.py 保持一致）
@@ -228,6 +228,7 @@ function requiresAntiContent(endpoint) {
         'janus/api/subSystem/getAuthToken',
         'earth/api/merchant/queryMerchantInfoByMallId',
         'chats/getToken',
+        'saturn/reportedReview/query/queryTypesReportedReviewNum',
         // 完整白名单请参考 res.js 源码第 1547 行
     ];
 

@@ -22,8 +22,8 @@ DEFAULT_USER_AGENT = (
     "Chrome/137.0.0.0 Safari/537.36"
 )
 
-# res.js 路径：pdd-httpAPI/python/ → 上两级 → Anti-Content-pdd/res.js
-_RES_JS_PATH = Path(__file__).resolve().parent.parent.parent / "Anti-Content-pdd" / "res.js"
+# res.js 路径：python/ → 上一级 → anti-content/res.js
+_RES_JS_PATH = Path(__file__).resolve().parent.parent / "anti-content" / "res.js"
 _JS_CONTEXT = None
 
 # Anti-Content 白名单（从 anti_content.js 的 requiresAntiContent 移植）
@@ -81,6 +81,7 @@ _WHITELIST = [
     'earth/api/merchant/queryMerchantInfoByMallId',
     'chats/getToken',
     'leekmms/activity/query/enroll/rule_suggest_price',
+    'saturn/reportedReview/query/queryTypesReportedReviewNum',
 ]
 
 

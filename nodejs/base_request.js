@@ -23,9 +23,10 @@ function sleep(ms) {
 function sanitize(data) {
     if (!data || typeof data !== 'object') return data;
     const result = {};
+    const sensitiveSet = new Set(_SENSITIVE_KEYS.map(s => s.toLowerCase()));
     for (const k of Object.keys(data)) {
         const lk = k.toLowerCase();
-        if (_SENSITIVE_KEYS.includes(lk) || _SENSITIVE_KEYS.some(s => lk.includes(s))) {
+        if (sensitiveSet.has(lk)) {
             result[k] = '***';
         } else if (typeof data[k] === 'object' && data[k] !== null) {
             result[k] = Array.isArray(data[k]) ? data[k].map(sanitize) : sanitize(data[k]);
@@ -50,6 +51,8 @@ class BaseRequest {
         this.cookies = opts.cookies || {};
         this.mallId = opts.mallId || null;
         this.maxRetries = opts.maxRetries != null ? opts.maxRetries : 3;
+        this.retryDelay = opts.retryDelay || 1.0;
+        this.retryBackoff = opts.retryBackoff || 2.0;
         this.minInterval = opts.minInterval != null ? opts.minInterval : 0.5;
         this.autoRelogin = !!opts.autoRelogin;
         this._reloginCallback = opts.reloginCallback || null;
@@ -103,7 +106,8 @@ class BaseRequest {
 
     // ── 底层请求 ────────────────────────────────────────────────────
 
-    _rawRequest(method, url, { params, body, referer, headers, timeout = 30000 } = {}) {
+    _rawRequest(method, url, { params, body, referer, headers, timeout = 30000, _redirectCount = 0 } = {}) {
+        const MAX_REDIRECTS = 5;
         return new Promise((resolve, reject) => {
             let fullUrl = url;
             if (params && Object.keys(params).length) {
@@ -128,6 +132,18 @@ class BaseRequest {
                 timeout,
             };
             const req = lib.request(reqOpts, (res) => {
+                const redirectCodes = [301, 302, 307, 308];
+                if (redirectCodes.includes(res.statusCode) && _redirectCount < MAX_REDIRECTS) {
+                    const location = res.headers['location'];
+                    if (location) {
+                        const nextUrl = new URL(location, fullUrl).href;
+                        const nextMethod = (res.statusCode === 307 || res.statusCode === 308) ? method : 'GET';
+                        const nextBody = nextMethod === 'GET' || nextMethod === 'HEAD' ? null : body;
+                        this._rawRequest(nextMethod, nextUrl, { body: nextBody, referer, headers, timeout, _redirectCount: _redirectCount + 1 })
+                            .then(resolve, reject);
+                        return;
+                    }
+                }
                 let chunks = '';
                 res.on('data', d => chunks += d);
                 res.on('end', () => {
@@ -151,7 +167,7 @@ class BaseRequest {
     }
 
     _calcRetryDelay(attempt) {
-        const base = 1.0 * Math.pow(2, attempt);
+        const base = this.retryDelay * Math.pow(this.retryBackoff, attempt);
         const jitter = (0.1 + Math.random() * 0.2) * base;
         return (base + jitter) * 1000;
     }

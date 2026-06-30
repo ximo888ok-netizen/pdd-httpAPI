@@ -5,13 +5,13 @@ const BASE = 'https://mms.pinduoduo.com';
 
 class AuthShopAPI extends BaseRequest {
     async getToken() {
-        return this.post(`${BASE}/chats/getToken`, { data: '' });
+        return this.post(`${BASE}/chats/getToken`, { data: '{}' });
     }
     async getUserInfo() {
-        return this.post(`${BASE}/janus/api/new/userinfo`, { data: '' });
+        return this.post(`${BASE}/janus/api/new/userinfo`, { data: '{}' });
     }
     async getShopInfo() {
-        return this.post(`${BASE}/earth/api/merchant/queryMerchantInfoByMallId`, { data: '' });
+        return this.post(`${BASE}/earth/api/merchant/queryMerchantInfoByMallId`, { data: '{}' });
     }
     async setCsstatus(status) {
         return this.post(`${BASE}/plateau/chat/set_csstatus`, { json: { status } });
